@@ -3,30 +3,31 @@ import matplotlib.pyplot as plt
 import kerrgeopy as kg
 
 sma = 120
-a = 0.5
+a = 0.9
 ecc = 0.3
 incl = 80
 phi_r0 = 0
 phi_theta0 = 0
 phi_phi0 = 0
-theta_obs = cp.pi
+theta_obs = cp.pi/4
 n_obs = cp.array([cp.sin(theta_obs), cp.array(0), cp.cos(theta_obs)])
-theta_d = cp.radians(10)
+theta_d = cp.radians(1e-6)
 phi_d = np.radians(0)
-n = 100000
+dt = 10 # timestep in seconds
 G = 6.6743e-8 # cgs
 Msun = 1.989e33 # g
-Mbh = cp.array(1e6) * Msun
+logMbh = cp.array([6])
+Mbh = cp.array(10**logMbh) * Msun
 c = 2.998e10 # cm/s
 t_g = cp.array(G * Mbh / c**3)
-P_d = 2e6 / t_g # disk period in t_g
+P_d = 1e8 # disk period in s
 
-windows = np.array([[0, 2e5], [2e6,2.2e6]], ndmin=2)
+windows = np.array([[0, 4.1e5]], ndmin=2)
 np.savetxt('windows.dat', windows)
 
-from pn_trajectory_sparse import trajectory
+from pn_trajectory import trajectory
 
-t, r, (x, y, z), lambd = trajectory(windows/t_g.get(), np.array([sma]), np.array([ecc]), np.array([incl]), np.array([a]), np.array([phi_r0]), np.array([phi_theta0]), np.array([phi_phi0]), n=n)
+t, r, (x, y, z), lambd = trajectory(windows, logMbh, np.array([sma]), np.array([ecc]), np.array([incl]), np.array([a]), np.array([phi_r0]), np.array([phi_theta0]), np.array([phi_phi0]), dt=dt)
 t = t[0] * t_g # convert gravitational time to physical time
 r = r[0]
 x = x[0]

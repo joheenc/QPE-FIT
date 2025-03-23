@@ -1,5 +1,5 @@
 import numpy as np, cupy as cp, emcee, matplotlib.pyplot as plt, h5py, heapq, corner
-from pn_trajectory_sparse import residuals
+from pn_trajectory import residuals
 from scipy.stats import binned_statistic_2d
 from emcee.backends import HDFBackend
 
@@ -22,11 +22,11 @@ def log_prob(theta, param_lims, timings, windows, errs):
 
 if __name__ == '__main__':
     timings = cp.loadtxt('timings_kg.dat')
-    windows = cp.loadtxt('windows.dat', ndmin=2)
+    windows = np.loadtxt('windows.dat', ndmin=2)
     errs = cp.ones_like(timings)
 
-    print(log_likelihood(np.array([[120, 0.3, 80, 0.5, 6, np.pi, 10, 0, 2e6],
-                                   [180, 0.3, 80, 0.5, 6, np.pi, 10, 0, 2e6]]).reshape(-1, 9), timings, windows, errs))
+    print(log_likelihood(np.array([[120, 0.3, 80, 0.9, 6, np.pi/4, 0, 0, 1e8],
+                                   [180, 0.3, 80, 0.9, 6, np.pi/4, 0, 0, 1e8]]).reshape(-1, 9), timings, windows, errs))
     # lls = [log_likelihood(np.vstack([360, 0.3, 80, 0.5, phir0, 0, 0, 10, 0, 2e6]*2).reshape(-1, 10), timings, windows, errs)[0] for phir0 in np.linspace(0, 2*np.pi, 30)]
     # plt.plot(np.linspace(0, 2*np.pi, 30), lls)
     # plt.savefig('lls.png')
@@ -37,24 +37,24 @@ if __name__ == '__main__':
     e_lims = (0, 0.9)
     incl_lims = (30, 90)
     a_lims = (0., 0.998)
-    logMbh_lims = (5.9, 6.1)
+    logMbh_lims = (5.6, 6.4)
     theta_obs_lims = (0, 2*np.pi)
     theta_d_lims = (0, 30)
     phi_d_lims = (-np.pi, np.pi)
-    P_d_lims = (1.999e6, 2.001e6)
+    P_d_lims = (.999e8, 1.001e8)
     param_lims = [sma_lims, e_lims, incl_lims, a_lims, logMbh_lims, theta_obs_lims, theta_d_lims, phi_d_lims, P_d_lims]
     ndim = len(param_lims)
     nsteps = 2000
-    topk = 100000
+    topk = 5000
     nwalkers = 1000
     rng = np.random.default_rng()
     p0 = np.column_stack([rng.uniform(lim[0], lim[1], size=nwalkers) for lim in param_lims])
 
-    filename = "samples.h5"
+    filename = "samples_20.h5"
     backend = HDFBackend(filename)
-    backend.reset(nwalkers, ndim)
     sampler = emcee.EnsembleSampler(nwalkers, ndim, log_prob, args=[param_lims, timings, windows, errs], backend=backend, vectorize=True)
     # p0 = sampler.chain[-1]
+    backend.reset(nwalkers, ndim)
     sampler.run_mcmc(p0, nsteps, progress=True)
 
     chunk_size = 100
@@ -124,6 +124,6 @@ if __name__ == '__main__':
     plt.close()
 
     labels = ["sma", "e", "incl", "a", "$\\log M_{\\rm BH}$", "$\\theta_{\\rm obs}$", "$\\theta_d$", "$\\phi_d$", "P_d"]
-    fig = corner.corner(posterior_topk, labels=labels, show_titles=True)
+    fig = corner.corner(posterior_topk, labels=labels, smooth=2, show_titles=True)
     fig.savefig("corner_plot.png")
     plt.close()
