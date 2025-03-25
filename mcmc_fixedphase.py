@@ -75,7 +75,6 @@ if __name__ == '__main__':
         threshold = min_heap[0]
 
     print("Threshold for top-k lnprob samples:", threshold)
-    discard = 1000
 
     samples_list = []
     lnprob_kept_list = []
