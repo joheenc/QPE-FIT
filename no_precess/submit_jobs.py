@@ -14,7 +14,7 @@ for sma in smas:
         for spin in spins:
             for Mbh in Mbhs:
                 for i, window in enumerate(windows):
-                    if len(windows) > 3:
+                    if i > 2:
                         dt = 100
                     else:
                         dt = 10
