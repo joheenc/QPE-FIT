@@ -14,7 +14,7 @@ The relevant scripts included, with a listing of required keyword arguments, are
 - $e$: EMRI eccentricity
 - $i$: EMRI inclination (degrees)
 - $a_\bullet$: MBH spin
-- $M_\bullet$: log(MBH mass) (solar)
+- $M_\bullet$: log(MBH mass) (solar masses)
 - $\theta_{\rm obs}$: Observer viewing angle (radians)
 - $\theta_{\rm disk}$: Disk inclination angle (degrees)
 - $T_{\rm disk}$: Disk precession period (multiples of EMRI orbital period)
