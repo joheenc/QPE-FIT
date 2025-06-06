@@ -10,7 +10,7 @@ Dependencies:
 The relevant scripts included, with a listing of required keyword arguments, are:
 
 `generate_timings.py` : generate a set of mock QPE timings for a choice of EMRI/disk parameters
-- $a$: EMRI semimajor axis (Rg/gravitational radii)
+- $a$: EMRI semimajor axis ($R_g$/gravitational radii)
 - $e$: EMRI eccentricity
 - $i$: EMRI inclination (degrees)
 - $a_\bullet$: MBH spin
