@@ -200,16 +200,17 @@ def trajectory(windows, logMbh, sma, ecc, incl, spin, phi_r0, phi_theta0, phi_ph
 	return t, r, cartesian(r, cos_theta, phi), lambd, P_orb
 
 # def residuals(timings, windows, errs, sma, e, incl, a, logMbh, theta_obs, phi_r0, phi_theta0, phi_phi0, theta_d, phi_d, P_d):
-def residuals(timings, windows, errs, sma, e, incl, a, logMbh, theta_obs, theta_d, P_d, dt):
+def residuals(timings, windows, errs, sma, e, incl, a, logMbh, theta_obs, theta_d, P_d, phi_d, t0, dt):
 	t, r, (x, y, z), _, P_orb = trajectory(windows, logMbh, sma, e, incl, a, np.zeros_like(a), np.zeros_like(a), np.zeros_like(a), dt)
 	P_d = cp.array(P_d) * P_orb
 	theta_d = cp.radians(cp.array(theta_d))
+	phi_d = cp.array(phi_d)
 	t_g = 4.926580927874239e-06 * 10**cp.array(logMbh)
 	t = t * t_g[:, None] # convert t from gravitational time to seconds
 	theta_obs = cp.array(theta_obs)
 	n_obs = cp.column_stack((cp.sin(theta_obs), cp.zeros_like(theta_obs), cp.cos(theta_obs)))
-	n_crs_x = cp.sin(theta_d[:, None]) * cp.cos(2 * cp.pi * t / P_d[:, None])
-	n_crs_y = cp.sin(theta_d[:, None]) * cp.sin(2 * cp.pi * t / P_d[:, None])
+	n_crs_x = cp.sin(theta_d[:, None]) * cp.cos(2 * cp.pi * t / P_d[:, None] + phi_d[:, None])
+	n_crs_y = cp.sin(theta_d[:, None]) * cp.sin(2 * cp.pi * t / P_d[:, None] + phi_d[:, None])
 	n_crs_z = cp.cos(theta_d[:, None])
 	dot_product = n_obs[:, 0][:, None] * n_crs_x + n_obs[:, 1][:, None] * n_crs_y + n_obs[:, 2][:, None] * n_crs_z
 	shapiro_delay = -2 * np.log(r * (1 + dot_product)) * t_g[:, None]
@@ -221,6 +222,7 @@ def residuals(timings, windows, errs, sma, e, incl, a, logMbh, theta_obs, theta_
 	crossings = cp.where(crossings_mask, t[:, :-1] + shapiro_delay[:, :-1] + geometric_delay[:, :-1], cp.nan)
 	sorted_indices = cp.argsort(cp.isnan(crossings), axis=1)
 	all_crossings = cp.take_along_axis(crossings, sorted_indices, axis=1)[:, :max_num_crossings]
+	all_crossings = all_crossings - cp.array(t0[:, None])
 	resid = cp.zeros_like(sma)
 	for window in windows:
 		crossings_in_window = cp.where((all_crossings >= window[0]) & (all_crossings <= window[1]) & (cp.isfinite(all_crossings)), all_crossings, cp.inf)
