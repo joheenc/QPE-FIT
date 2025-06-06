@@ -17,7 +17,6 @@ generate_timings.py
 - Observation windows (seconds)
 - Output file to store QPE timings
 - Output file to store observation windows (this is a helper file to pass the info along to the MCMC scripts)
-- time step resolution for trial parameter trajectories (seconds)
 
 ```
 mcmc_fixedphase.py
