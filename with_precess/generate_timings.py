@@ -8,15 +8,15 @@ ecc = float(sys.argv[2])
 incl = float(sys.argv[3])
 a = float(sys.argv[4])
 logMbh = float(sys.argv[5])
-theta_d = cp.radians(float(sys.argv[6]))
-P_d = float(sys.argv[7])
-windows = np.array(ast.literal_eval(sys.argv[8]), ndmin=2, dtype=np.float64)
-timing_file = sys.argv[9]
-window_file = sys.argv[10]
+theta_obs = cp.array(float(sys.argv[6]))
+theta_d = cp.radians(float(sys.argv[7]))
+P_d = float(sys.argv[8])
+windows = np.array(ast.literal_eval(sys.argv[9]), ndmin=2, dtype=np.float64)
+timing_file = sys.argv[10]
+window_file = sys.argv[11]
 phi_r0 = 0
 phi_theta0 = 0
 phi_phi0 = 0
-theta_obs = cp.pi/4
 n_obs = cp.array([cp.sin(theta_obs), cp.array(0), cp.cos(theta_obs)])
 
 phi_d = np.radians(0)
