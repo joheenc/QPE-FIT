@@ -35,7 +35,7 @@ The relevant scripts included, with a listing of required keyword arguments, are
 - `topk`: retain the top $k$ log-likelihood samples
 
 ```
-python generate_timings.py 100 0.1 60 0.998 5 0.785 10 20 [[0,100000],[500000,600000]] timings.dat windows.dat
+python generate_timings.py 100 0.1 60 0.998 5 0.785 10 20 [[0,100000],[500000,600000]] timings.dat windows.dat errors.dat
 python mcmc_fixedphase.py output_chain.h5 timings.dat errors.dat windows.dat 100000 1000 10
 python read_chain.py output_chain.h5 100000
 ```
