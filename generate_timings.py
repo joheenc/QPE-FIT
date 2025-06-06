@@ -1,5 +1,4 @@
 import numpy as np, cupy as cp, os, sys, ast
-import matplotlib.pyplot as plt
 import kerrgeopy as kg
 
 
