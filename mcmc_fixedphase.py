@@ -37,7 +37,9 @@ if __name__ == '__main__':
     theta_obs_lims = (0, np.pi)
     theta_d_lims = (0, 60)
     P_d_lims = (2, 100)
-    param_lims = [sma_lims, e_lims, incl_lims, a_lims, logMbh_lims, theta_obs_lims, theta_d_lims, P_d_lims]
+    phi_d_lims = (0, np.pi)
+    t0_lims = (-50000, 50000)
+    param_lims = [sma_lims, e_lims, incl_lims, a_lims, logMbh_lims, theta_obs_lims, theta_d_lims, P_d_lims, phi_d_lims, t0_lims]
     ndim = len(param_lims)
     rng = np.random.default_rng()
     p0 = np.column_stack([rng.uniform(lim[0], lim[1], size=nwalkers) for lim in param_lims])
