@@ -24,10 +24,10 @@ if __name__ == '__main__':
     output_file = sys.argv[1]
     timings = cp.loadtxt(sys.argv[2])
     windows = np.loadtxt(sys.argv[3], ndmin=2)
-    nsteps = int(sys.argv[4])
-    nwalkers = int(sys.argv[5])
-    dt = float(sys.argv[6])
-    errs = cp.ones_like(timings)*100
+    errs = cp.loadtxt(sys.argv[4])
+    nsteps = int(sys.argv[5])
+    nwalkers = int(sys.argv[6])
+    dt = float(sys.argv[7])
 
     sma_lims = (30, 500)
     e_lims = (0, 0.9)
