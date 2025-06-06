@@ -21,7 +21,7 @@ def log_prob(theta, param_lims, timings, windows, errs, dt):
     return result
 
 if __name__ == '__main__':
-    filename = sys.argv[1]
+    output_file = sys.argv[1]
     timings = cp.loadtxt(sys.argv[2])
     windows = np.loadtxt(sys.argv[3], ndmin=2)
     nsteps = int(sys.argv[4])
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     rng = np.random.default_rng()
     p0 = np.column_stack([rng.uniform(lim[0], lim[1], size=nwalkers) for lim in param_lims])
 
-    backend = HDFBackend(filename)
+    backend = HDFBackend(output_file)
     sampler = emcee.EnsembleSampler(nwalkers, ndim, log_prob, args=[param_lims, timings, windows, errs, dt], backend=backend, vectorize=True)
     backend.reset(nwalkers, ndim)
     sampler.run_mcmc(p0, nsteps, progress=True)
