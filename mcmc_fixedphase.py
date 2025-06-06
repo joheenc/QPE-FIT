@@ -1,6 +1,5 @@
 import numpy as np, cupy as cp, emcee, matplotlib.pyplot as plt, h5py, heapq, corner, sys
 from pn_trajectory import residuals
-from scipy.stats import binned_statistic_2d
 from emcee.backends import HDFBackend
 
 def log_prior(theta, param_lims):
