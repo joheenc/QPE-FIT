@@ -26,6 +26,6 @@ The relevant scripts included, with a listing of required keyword arguments, are
 - number of parallel walkers to include
 - time step resolution for trial parameter trajectories (seconds)
 ```
-python generate_timings.py 100 0.1 60 0.998 6 0.785 5 20 [[0,100000],[1100000,1200000],[2200000,2300000],[3300000,3400000]] timings.dat windows.dat
+python generate_timings.py 100 0.1 60 0.998 6 0.785 5 20 [[0,100000],[500000,600000]] timings.dat windows.dat
 python mcmc_fixedphase.py output)chain.h5 timiings.dat windows.dat 100000 1000 10
 ```
