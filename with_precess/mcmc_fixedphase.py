@@ -31,11 +31,11 @@ if __name__ == '__main__':
 
     sma_lims = (30, 500)
     e_lims = (0, 0.9)
-    incl_lims = (30, 90)
+    incl_lims = (0, 90)
     a_lims = (0., 0.998)
     logMbh_lims = (4, 8)
     theta_obs_lims = (0, np.pi)
-    theta_d_lims = (0, 30)
+    theta_d_lims = (0, 60)
     P_d_lims = (2, 100)
     param_lims = [sma_lims, e_lims, incl_lims, a_lims, logMbh_lims, theta_obs_lims, theta_d_lims, P_d_lims]
     ndim = len(param_lims)
