@@ -43,6 +43,6 @@ with h5py.File(filename, "r") as f:
     posterior_topk = np.concatenate(samples_list, axis=0)
     lnprob_topk = np.concatenate(lnprob_kept_list, axis=0)
 
-labels = ['sma', 'ecc', 'incl', 'a', 'log(Mbh)', "$\\theta_{\\rm obs}$"]
-fig = corner.corner(posterior_topk, labels=labels, show_titles=True)
+labels = ['$a$', '$e$', '$i$', r'$a_\bullet$', r'$\log M_\bullet$', r'$\theta_{\rm obs}$', r'$\theta_{\rm disk}$', r'$T_{\rm disk}/P_{\rm orb}$', r'$\phi_{\rm disk, 0}$', '$t_0$']
+fig = corner.corner(posterior_topk, labels=labels, show_titles=True, smooth=2)
 fig.savefig("corner_plot.png")
