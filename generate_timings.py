@@ -13,6 +13,7 @@ P_d = float(sys.argv[8])
 windows = np.array(ast.literal_eval(sys.argv[9]), ndmin=2, dtype=np.float64)
 timing_file = sys.argv[10]
 window_file = sys.argv[11]
+error_file = sys.argv[12]
 phi_r0 = 0
 phi_theta0 = 0
 phi_phi0 = 0
@@ -49,3 +50,4 @@ shapiro_delay = -2 * np.log(rgeo(lambd) * (1 + dot_product.get())) * t_g.get()
 geometric_delay = -rgeo(lambd) * dot_product.get() * t_g.get()
 model_timings += shapiro_delay[sign_changes] + geometric_delay[sign_changes]
 np.savetxt(timing_file, model_timings)
+np.savetxt(error_file, np.full_like(model_timings, 100))
