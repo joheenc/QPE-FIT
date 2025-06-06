@@ -30,12 +30,12 @@ The relevant scripts included, with a listing of required keyword arguments, are
 - `topk`: retain the top $k$ log-likelihood samples
 
 ```
-python generate_timings.py 100 0.1 60 0.998 6 0.785 5 20 [[0,100000],[500000,600000]] timings.dat windows.dat
+python generate_timings.py 100 0.1 60 0.998 5 0.785 5 20 [[0,100000],[500000,600000]] timings.dat windows.dat
 python mcmc_fixedphase.py output_chain.h5 timings.dat errors.dat windows.dat 100000 1000 10
 python read_chain.py output_chain.h5 100000
 ```
 
-The first script calculates the exact trajectory of an orbiting body with $a=100R_g$, $e=0.1$, $i=60^\circ$, $a_\bullet=0.998$, $M_\bullet=10^6M_\odot$, for an observer inclined at $\pi/4$ radians and an accretion disk inclined at $5^\circ$ undering nodal precession with a period of $T_{\rm disk}=20P_{\rm orb}$. The trajectory is computed using KerrGeoPy with 10-second time resolution, then compute its disk-crossing times to store into `timings.dat`. These calculations are only made for the time intervals specified in `windows.dat` (so in this example, we have two 100 kilosecond observations separated by a 400 kilosecond gap).
+The first script calculates the exact trajectory of an orbiting body with $a=100R_g$, $e=0.1$, $i=60^\circ$, $a_\bullet=0.998$, $M_\bullet=10^5M_\odot$, for an observer inclined at $\pi/4$ radians and an accretion disk inclined at $5^\circ$ undering nodal precession with a period of $T_{\rm disk}=20P_{\rm orb}$. The trajectory is computed using KerrGeoPy with 10-second time resolution, then compute its disk-crossing times to store into `timings.dat`. These calculations are only made for the time intervals specified in `windows.dat` (so in this example, we have two 100 kilosecond observations separated by a 400 kilosecond gap).
 
 The second script runs MCMC parameter estimation using the QPE timings stored in `timings.dat`. In addition to the 8 free parameters passed into `generate_timings.py`, there are two further ones---$\phi_{\rm disk}$ and $t_0$---which account for an initial disk azimuthal phase argument and an overall EMRI-disk system phase argument to uniformly shift the timings. For the purposes of generating a mock trajectory, these initial phase arguments are both set to zero, but they are important to let vary when fitting to real data. Note that the prior range of $t_0$ can be tricky to define, and should be set on a case-by-case basis---typically, allowing to span a range equal to about one QPE recurrence time is a good idea.
 
