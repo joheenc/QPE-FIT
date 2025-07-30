@@ -229,7 +229,7 @@ def residuals(timings, windows, errs, sma, e, incl, a, logMbh, theta_obs, theta_
 		idx = (timings >= window[0]) & (timings <= window[1])
 		timings_in_window = timings[idx]
 		crossings_in_window = cp.take_along_axis(crossings_in_window, cp.argsort(~cp.isfinite(crossings_in_window), axis=1)[:, :len(timings_in_window)], axis=1)
-		errs_in_window = timings[idx]
+		errs_in_window = errs[idx]
 		resid += cp.nansum((timings_in_window - crossings_in_window)**2 / errs_in_window**2, axis=1)
 	resid[~cp.isfinite(resid)] = cp.nanmax(resid)
 	return resid
