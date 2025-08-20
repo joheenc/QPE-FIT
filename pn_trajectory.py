@@ -199,9 +199,8 @@ def trajectory(windows, logMbh, sma, ecc, incl, spin, phi_r0, phi_theta0, phi_ph
 
 	return t, r, cartesian(r, cos_theta, phi), lambd, P_orb
 
-# def residuals(timings, windows, errs, sma, e, incl, a, logMbh, theta_obs, phi_r0, phi_theta0, phi_phi0, theta_d, phi_d, P_d):
-def residuals(timings, windows, errs, sma, e, incl, a, logMbh, theta_obs, theta_d, P_d, phi_d, t0, dt):
-	t, r, (x, y, z), _, P_orb = trajectory(windows, logMbh, sma, e, incl, a, np.zeros_like(a), np.zeros_like(a), np.zeros_like(a), dt)
+def residuals(timings, windows, errs, sma, e, incl, phi_r0, phi_theta0, phi_phi0, a, logMbh, theta_obs, theta_d, P_d, phi_d, dt):
+	t, r, (x, y, z), _, P_orb = trajectory(windows, logMbh, sma, e, incl, a, phi_r0, phi_theta0, phi_phi0, dt)
 	P_d = cp.array(P_d) * P_orb
 	theta_d = cp.radians(cp.array(theta_d))
 	phi_d = cp.array(phi_d)
@@ -212,24 +211,52 @@ def residuals(timings, windows, errs, sma, e, incl, a, logMbh, theta_obs, theta_
 	n_crs_x = cp.sin(theta_d[:, None]) * cp.cos(2 * cp.pi * t / P_d[:, None] + phi_d[:, None])
 	n_crs_y = cp.sin(theta_d[:, None]) * cp.sin(2 * cp.pi * t / P_d[:, None] + phi_d[:, None])
 	n_crs_z = cp.cos(theta_d[:, None])
-	dot_product = n_obs[:, 0][:, None] * n_crs_x + n_obs[:, 1][:, None] * n_crs_y + n_obs[:, 2][:, None] * n_crs_z
-	shapiro_delay = -2 * np.log(r * (1 + dot_product)) * t_g[:, None]
-	geometric_delay = -r * dot_product * t_g[:, None]
+    
+    # Calculate disk crossings
 	D_t = n_crs_x * x + n_crs_y * y + n_crs_z * z
 	crossings_mask = (D_t[:, :-1] * D_t[:, 1:]) < 0
 	num_valid = cp.sum(crossings_mask, axis=1)
 	max_num_crossings = int(cp.max(num_valid))
-	crossings = cp.where(crossings_mask, t[:, :-1] + shapiro_delay[:, :-1] + geometric_delay[:, :-1], cp.nan)
+    
+    # Linear interpolation for crossing times
+	t_cross = t[:, :-1] - D_t[:, :-1] * (t[:, 1:] - t[:, :-1]) / (D_t[:, 1:] - D_t[:, :-1])
+    
+    # Interpolate positions at crossing times
+	alpha = -D_t[:, :-1] / (D_t[:, 1:] - D_t[:, :-1])  # interpolation factor
+	x_cross = x[:, :-1] + alpha * (x[:, 1:] - x[:, :-1])
+	y_cross = y[:, :-1] + alpha * (y[:, 1:] - y[:, :-1])
+	z_cross = z[:, :-1] + alpha * (z[:, 1:] - z[:, :-1])
+	r_cross = r[:, :-1] + alpha * (r[:, 1:] - r[:, :-1])
+    
+    # Calculate delays at crossing positions
+	r_mag = cp.sqrt(x_cross**2 + y_cross**2 + z_cross**2)
+	r_unit_x = x_cross / r_mag
+	r_unit_y = y_cross / r_mag
+	r_unit_z = z_cross / r_mag
+    
+    # Dot product: observer direction · star position unit vector
+	cos_angle = n_obs[:, 0][:, None] * r_unit_x + n_obs[:, 1][:, None] * r_unit_y + n_obs[:, 2][:, None] * r_unit_z
+    
+    # Shapiro delay (due to gravitational field), -2GM/c³ * ln(r(1 - n_obs·r_hat))
+	shapiro_delay = -2 * t_g[:, None] * cp.log(r_cross * (1 - cos_angle))
+    
+    # Geometric delay (light travel time difference), r * (n_obs·r_hat) * GM/c³
+	geometric_delay = r_cross * cos_angle * t_g[:, None]
+    
+    # Apply delays only where crossings occur
+	crossings = cp.where(crossings_mask, t_cross + shapiro_delay + geometric_delay, cp.nan)
+    
 	sorted_indices = cp.argsort(cp.isnan(crossings), axis=1)
 	all_crossings = cp.take_along_axis(crossings, sorted_indices, axis=1)[:, :max_num_crossings]
-	all_crossings = all_crossings - cp.array(t0[:, None])
+    
 	resid = cp.zeros_like(sma)
 	for window in windows:
 		crossings_in_window = cp.where((all_crossings >= window[0]) & (all_crossings <= window[1]) & (cp.isfinite(all_crossings)), all_crossings, cp.inf)
 		idx = (timings >= window[0]) & (timings <= window[1])
 		timings_in_window = timings[idx]
-		crossings_in_window = cp.take_along_axis(crossings_in_window, cp.argsort(~cp.isfinite(crossings_in_window), axis=1)[:, :len(timings_in_window)], axis=1)
 		errs_in_window = errs[idx]
-		resid += cp.nansum((timings_in_window - crossings_in_window)**2 / errs_in_window**2, axis=1)
+		crossings_in_window = cp.take_along_axis(crossings_in_window, cp.argsort(~cp.isfinite(crossings_in_window), axis=1)[:, :len(timings_in_window)], axis=1)
+		crossings_in_window[crossings_in_window == cp.inf] = window[1]+4000
+		resid += cp.nansum((timings_in_window - crossings_in_window)**2 / errs_in_window**2, axis=1)    
 	resid[~cp.isfinite(resid)] = cp.nanmax(resid)
 	return resid
