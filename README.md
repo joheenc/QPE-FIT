@@ -92,15 +92,15 @@ Here's a complete end-to-end example that:
 # Disk: 15° inclination, 500 P_orb precession period
 # Two 100 ks observation windows separated by 400 ks gap
 python generate_timings.py 75 0.15 45 0 0 0 0.9 5.8 30 15 500 0 \
-    "[[0,100000],[500000,600000]]" timings.dat windows.dat
+    "[[0,100000],[500000,600000]]" timings.txt windows.txt
 
 # Step 2: Add realistic timing uncertainties (example: 100s errors)
-python -c "import numpy as np; t=np.loadtxt('timings.dat'); \
-    np.savetxt('errors.dat', np.full(len(t), 100.0))"
+python -c "import numpy as np; t=np.loadtxt('timings.txt'); \
+    np.savetxt('errors.txt', np.full(len(t), 100.0))"
 
 # Step 3: Run nested sampling inference
 # Using 10s time resolution for trajectory computation
-python ns.py output_ns/ timings.dat windows.dat errors.dat 10
+python ns.py output_ns/ timings.txt windows.txt errors.txt 10
 
 # Step 4: Results will be in output_ns/ directory
 # - corner.png: posterior distribution plot
