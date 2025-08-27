@@ -4,12 +4,11 @@ This repository contains the code for `QPE-FIT`, a Bayesian parameter estimation
 
 Please email joheen@mit.edu with any requests, bug reports, or comments!
 
-## Key Features
+## Features
 
-- **Dual trajectory computation methods**: Exact Kerr geodesics (via KerrGeoPy) for mock data generation and fast post-Newtonian approximations for inference
-- **GPU acceleration**: Leverages CuPy for efficient parallel computation
-- **Modern Bayesian inference**: Uses UltraNest nested sampling for robust parameter estimation
-- **Comprehensive physical modeling**: Includes relativistic effects (Shapiro and geometric delays) and disk precession
+- **Efficient trajectory computation** with the post-Newtonian formalism for rapid inference
+- **GPU acceleration** with CuPy for efficient parallel computation during likelihood evaluations
+- **Bayesian inference** with the UltraNest nested sampling library for robust parameter estimation
 
 ## Dependencies
 
@@ -22,15 +21,13 @@ Please email joheen@mit.edu with any requests, bug reports, or comments!
 ## Module Overview
 
 ### `pn_trajectory.py`
-Core computational module implementing post-Newtonian formalism for EMRI trajectories. Contains:
-- Post-Newtonian expansion coefficients based on [Sago & Fujita 2015](https://arxiv.org/abs/1505.01600)
-- Mino frequency calculations
-- GPU-accelerated trajectory computation
+Backend script implementing the post-Newtonian (PN) formalism for EMRI trajectories. Contains:
+- GPU-accelerated computation of PN coefficients and Fourier-series trajectories following [Sago & Fujita 2015](https://arxiv.org/abs/1505.01600)
 - Disk crossing detection with relativistic time delay corrections
-- Residual calculation for parameter fitting
+- Timing residuals calculation for parameter fitting
 
 #### `generate_timings.py`
-Generate mock QPE timings for a given set of EMRI/disk parameters using exact Kerr geodesics.
+Generate mock QPE timings for a given set of EMRI/disk parameters using exact Kerr geodesics (via KerrGeoPy)
 
 **Command-line arguments:**
 - `sma`: EMRI semimajor axis (gravitational radii $R_g$)
@@ -39,13 +36,13 @@ Generate mock QPE timings for a given set of EMRI/disk parameters using exact Ke
 - `phi_r0`: Initial radial phase (radians)
 - `phi_theta0`: Initial polar phase (radians)
 - `phi_phi0`: Initial azimuthal phase (radians)
-- `spin`: MBH spin parameter ($a_\bullet$)
+- `spin`: MBH spin parameter ($\chi_\bullet$)
 - `logMbh`: log(MBH mass) (solar masses)
 - `theta_obs`: Observer viewing angle (degrees)
 - `theta_d`: Disk inclination angle (degrees)
 - `P_d`: Disk precession period (multiples of EMRI orbital period)
 - `phi_d`: Initial disk azimuthal phase (radians)
-- `windows`: Observation windows (seconds, as nested list)
+- `windows`: Observation windows (in seconds, as a 2D array)
 - `timing_file`: Output file for QPE timings
 - `window_file`: Output file for observation windows
 
@@ -54,10 +51,10 @@ Perform nested sampling inference on QPE timings to estimate system parameters.
 
 **Command-line arguments:**
 - `output_dir`: Directory for output files and logs
-- `timing_file`: File containing QPE timings (.txt format)
-- `window_file`: File containing observation windows (.txt format)
-- `error_file`: File containing timing uncertainties (.txt format)
-- `dt`: Time step resolution for trajectory computation (seconds)
+- `timing_file`: File containing QPE timings (one per line, in seconds, .txt format)
+- `window_file`: File containing observation windows (one space-separated start/stop pair per line, .txt format)
+- `error_file`: File containing timing uncertainties (one per line, in seconds, .txt format)
+- `dt`: Time step resolution for trajectory computation (in seconds)
 
 **Inferred Parameters:**
 The script fits for 12 parameters:
@@ -68,7 +65,7 @@ The script fits for 12 parameters:
 - `phi_theta0`: Initial EMRI longitudinal phase (0-2π radians)
 - `phi_phi0`: Initial EMRI azimuthal phase (0-2π radians)
 - `chi_bullet`: MBH spin (0-0.998)
-- `log M_bullet`: log(MBH mass)
+- `log M_bullet`: log(MBH mass) (solar masses)
 - `theta_obs`: Observer viewing angle (0-2π radians)
 - `theta_disk`: Disk inclination (0-90°)
 - `T_disk/P_orb`: Ratio of disk precession period to EMRI orbital period
@@ -88,11 +85,10 @@ Here's a complete end-to-end example that:
 
 ```bash
 # Step 1: Generate mock QPE timings
-# System: a=75 Rg, e=0.15, i=45°, spin=0.9, M_BH=10^5.8 M_sun
+# EMRI/MBH: a=100 Rg, e=0.15, i=45°, spin=0.9, M_BH=10^5.8 M_sun
 # Disk: 15° inclination, 500 P_orb precession period
-# Two 100 ks observation windows separated by 400 ks gap
-python generate_timings.py 75 0.15 45 0 0 0 0.9 5.8 30 15 500 0 \
-    "[[0,100000],[500000,600000]]" timings.txt windows.txt
+# Two 100 ks observation windows separated by a 400 ks gap
+python generate_timings.py 100 0.15 45 0 0 0 0.9 5.8 30 15 500 0 "[[0,100000],[500000,600000]]" timings.txt windows.txt
 
 # Step 2: Add realistic timing uncertainties (example: 100s errors)
 python -c "import numpy as np; t=np.loadtxt('timings.txt'); \
