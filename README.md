@@ -7,7 +7,7 @@ Please email joheen@mit.edu with any requests, bug reports, or comments!
 ## Features
 
 - **Efficient trajectory computation** with the post-Newtonian formalism for rapid inference
-- **GPU acceleration** with CuPy for efficient parallel computation during likelihood evaluations
+- **GPU acceleration** with CuPy for parallel computation during likelihood evaluations
 - **Bayesian inference** with the UltraNest nested sampling library for robust parameter estimation
 
 ## Dependencies
