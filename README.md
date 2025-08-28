@@ -14,7 +14,7 @@ Please email joheen@mit.edu with any requests, bug reports, or comments!
 
 - [KerrGeoPy](https://kerrgeopy.readthedocs.io/en/latest/) : For computing exact Kerr geodesic trajectories
 - [UltraNest](https://johannesbuchner.github.io/UltraNest) : For nested sampling inference
-- [CuPy](https://cupy.dev/) : For GPU-acceleration of trajectory computations
+- [CuPy](https://cupy.dev/) : For GPU-accelerated trajectory/residual computations
 - [NumPy](https://numpy.org/) : For numerical computations
 - [Corner](https://corner.readthedocs.io/) : For posterior distribution plots
 
