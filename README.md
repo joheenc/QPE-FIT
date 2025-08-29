@@ -106,4 +106,4 @@ From here, you can follow the [UltraNest tutorials](https://johannesbuchner.gith
 
 ## Citation
 
-If you use QPE-FIT in your research, please cite (arXiv paper coming soon)
+If you use QPE-FIT in your research, please cite [this paper](https://arxiv.org/abs/2508.20162)
