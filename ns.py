@@ -62,7 +62,7 @@ def log_likelihood(params):
     params_gpu = params.astype(np.float32)
     
     # Compute residuals on GPU with float32 for efficiency
-    resid = residuals(timings, windows, errs, *params_gpu.T, dt, dtype=cp.float32)
+    resid = residuals(timings, windows, errs, *params_gpu.T, dt)
     ll = -0.5 * resid.get()
     ll = np.where(np.isfinite(ll), ll, -1e30)
     # Return as float64 for UltraNest
