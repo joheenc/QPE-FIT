@@ -250,13 +250,39 @@ def residuals(timings, windows, errs, sma, e, incl, phi_r0, phi_theta0, phi_phi0
 	all_crossings = cp.take_along_axis(crossings, sorted_indices, axis=1)[:, :max_num_crossings]
     
 	resid = cp.zeros_like(sma)
-	for window in windows:
-		crossings_in_window = cp.where((all_crossings >= window[0]) & (all_crossings <= window[1]) & (cp.isfinite(all_crossings)), all_crossings, cp.inf)
-		idx = (timings >= window[0]) & (timings <= window[1])
-		timings_in_window = timings[idx]
-		errs_in_window = errs[idx]
-		crossings_in_window = cp.take_along_axis(crossings_in_window, cp.argsort(~cp.isfinite(crossings_in_window), axis=1)[:, :len(timings_in_window)], axis=1)
-		crossings_in_window[crossings_in_window == cp.inf] = window[1]
-		resid += cp.nansum((timings_in_window - crossings_in_window)**2 / errs_in_window**2, axis=1)    
-	resid[~cp.isfinite(resid)] = cp.nanmax(resid)
+    for window in windows:
+        window_start, window_end = dtype(window[0]), dtype(window[1])
+        # Find crossings in this window
+        valid_mask = (all_crossings >= window_start) & (all_crossings <= window_end) & cp.isfinite(all_crossings)
+        # Get timings for this window
+        timing_mask = (timings >= window_start) & (timings <= window_end)
+        if not cp.any(timing_mask):
+            continue
+        timings_in_window = timings[timing_mask]
+        errs_in_window = errs[timing_mask]
+        n_timings = len(timings_in_window)
+        # Extract relevant crossings for this window
+        crossings_in_window = cp.where(valid_mask, all_crossings, cp.inf)
+        # Sort to get the first n_timings valid crossings
+        if crossings_in_window.shape[1] > 0:
+            sort_idx = cp.argsort(crossings_in_window, axis=1)
+            crossings_sorted = cp.take_along_axis(crossings_in_window, sort_idx, axis=1)
+            # Take only the number of crossings we need
+            if crossings_sorted.shape[1] >= n_timings:
+                crossings_sorted = crossings_sorted[:, :n_timings]
+            else:
+                # Pad if we don't have enough crossings
+                padding = cp.full((crossings_sorted.shape[0], n_timings - crossings_sorted.shape[1]), 
+                                    window_end, dtype=dtype)
+                crossings_sorted = cp.hstack([crossings_sorted, padding])
+            # Replace inf values with window_end
+            crossings_sorted = cp.where(cp.isfinite(crossings_sorted), crossings_sorted, window_end)
+            # Compute residuals for this window
+            diff = timings_in_window[None, :] - crossings_sorted
+            chi2 = diff**2 / errs_in_window[None, :]**2
+            resid += cp.nansum(chi2, axis=1)
+    finite_mask = cp.isfinite(resid)
+    if cp.any(~finite_mask):
+        max_finite = cp.max(resid[finite_mask]) if cp.any(finite_mask) else 1e10
+        resid = cp.where(finite_mask, resid, max_finite * 10)
 	return resid
