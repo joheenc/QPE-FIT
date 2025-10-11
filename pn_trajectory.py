@@ -199,7 +199,7 @@ def trajectory(windows, logMbh, sma, ecc, incl, spin, phi_r0, phi_theta0, phi_ph
 
 	return t, r, cartesian(r, cos_theta, phi), lambd, P_orb
 
-def residuals(timings, windows, errs, sma, e, incl, phi_r0, phi_theta0, phi_phi0, a, logMbh, theta_obs, theta_d, P_d, phi_d, dt):
+def residuals(timings, windows, errs, sma, e, incl, phi_r0, phi_theta0, phi_phi0, a, logMbh, theta_obs, theta_d, P_d, phi_d, dt, dtype=cp.float32):
 	t, r, (x, y, z), _, P_orb = trajectory(windows, logMbh, sma, e, incl, a, phi_r0, phi_theta0, phi_phi0, dt)
 	P_d = cp.array(P_d) * P_orb
 	theta_d = cp.radians(cp.array(theta_d))
