@@ -41,11 +41,9 @@ def log_likelihood(params):
     batch_size = params.shape[0]
     params_gpu = params.astype(np.float32)
     
-    # Compute residuals on GPU with float32 for efficiency
     resid = residuals(timings, windows, errs, *params_gpu.T, dt)
     ll = -0.5 * resid.get()
     ll = np.where(np.isfinite(ll), ll, -1e30)
-    # Return as float64 for UltraNest
     return ll.astype(np.float64)
 
 if __name__ == '__main__':
@@ -54,13 +52,11 @@ if __name__ == '__main__':
 
     output_dir = sys.argv[1]
     
-    # Load data as float32 for GPU efficiency
     timings = cp.asarray(np.loadtxt(sys.argv[2]), dtype=cp.float32)
     windows = np.loadtxt(sys.argv[3], ndmin=2).astype(np.float64)
     errs = cp.asarray(np.loadtxt(sys.argv[4]), dtype=cp.float32)
     dt = float(sys.argv[5])
     
-    # Prior limits
     sma_lims = (50, 1000)
     e_lims = (0, 0.5)
     incl_lims = (0, 180)
@@ -99,7 +95,7 @@ if __name__ == '__main__':
         generate_direction=generate_region_oriented_direction
     )
     
-    # Run with settings optimized for multi-modal posteriors (you may want to tweak them!)
+    # you may want to tweak these settings!
     result = sampler.run(
         min_num_live_points=2000,
         dlogz=0.05,
@@ -112,23 +108,6 @@ if __name__ == '__main__':
     )
     
     sampler.print_results()
-    
-    # Report if multiple modes found
-    if hasattr(result, 'modes') and len(result.get('modes', [])) > 1:
-        print(f"\n⚠ WARNING: Found {len(result['modes'])} modes in posterior!")
-        print("This suggests multiple solutions fit the data similarly well.")
-        for i, mode in enumerate(result['modes']):
-            print(f"\nMode {i+1} (log Z = {mode['logz']:.2f}):")
-            for j, name in enumerate(param_names):
-                samples = mode['samples'][:, j]
-                q50 = np.median(samples)
-                print(f"  {name:12s}: {q50:.4f}")
-    
-    print(f"\nParameter estimates (global):")
-    for i, name in enumerate(param_names):
-        samples = result['samples'][:, i]
-        q16, q50, q84 = np.percentile(samples, [16, 50, 84])
-        print(f"{name:12s}: {q50:.4f} +{q84-q50:.4f} -{q50-q16:.4f}")
     
     # Generate corner plot
     corner_fig = corner.corner(
