@@ -18,41 +18,21 @@ def prior_transform(cube):
             cube = cube.T
     
     params = np.zeros_like(cube, dtype=np.float64)
-    
-    # Semi-major axis: log-uniform prior
-    params[:, 0] = 10**(cube[:, 0] * (np.log10(param_lims[0][1]) - np.log10(param_lims[0][0])) + np.log10(param_lims[0][0]))
-    
-    # Eccentricity: uniform
-    params[:, 1] = cube[:, 1] * (param_lims[1][1] - param_lims[1][0]) + param_lims[1][0]
-    
-    # Orbital inclination: uniform in cos(i) for isotropic orientation
-    cos_i = 1 - 2*cube[:, 2]  # Maps [0,1] to [1,-1] (cos(0°) to cos(180°))
-    params[:, 2] = np.arccos(cos_i) * 180/np.pi
-    
-    # Phase parameters: uniform
+    params[:, 0] = cube[:, 0] * (param_lims[0][1] - param_lims[0][0]) + param_lims[0][0] # sma
+    params[:, 1] = cube[:, 1] * (param_lims[1][1] - param_lims[1][0]) + param_lims[1][0] # ecc
+    cos_i = 1 - 2*cube[:, 2] # Orbital inclination: uniform in cos(i) for isotropic orientation
+    params[:, 2] = np.arccos(cos_i) * 180/np.pi    
     params[:, 3] = cube[:, 3] * 2*np.pi  # phi_r0
     params[:, 4] = cube[:, 4] * 2*np.pi  # phi_theta0
     params[:, 5] = cube[:, 5] * 2*np.pi  # phi_phi0
-    
-    # Spin: uniform
-    params[:, 6] = cube[:, 6] * (param_lims[6][1] - param_lims[6][0]) + param_lims[6][0]
-    
-    # Log mass: uniform
-    params[:, 7] = cube[:, 7] * (param_lims[7][1] - param_lims[7][0]) + param_lims[7][0]
-    
-    # Observer angle: uniform
-    params[:, 8] = cube[:, 8] * 2*np.pi
-    
-    # Disk inclination: uniform in cos(theta_d) for isotropic orientation
-    cos_theta_d_min = np.cos(param_lims[9][1] * np.pi/180)  # cos(80°)
+    params[:, 6] = cube[:, 6] * (param_lims[6][1] - param_lims[6][0]) + param_lims[6][0] # spin
+    params[:, 7] = cube[:, 7] * (param_lims[7][1] - param_lims[7][0]) + param_lims[7][0] # logMbh
+    params[:, 8] = cube[:, 8] * 2*np.pi # theta_obs
+    cos_theta_d_min = np.cos(param_lims[9][1] * np.pi/180)  # Disk inclination: uniform in cos(theta_d)
     cos_theta_d = cube[:, 9] * (1 - cos_theta_d_min) + cos_theta_d_min
     params[:, 9] = np.arccos(cos_theta_d) * 180/np.pi
-    
-    # Disk period: log-uniform (scale-invariant)
-    params[:, 10] = 10**(cube[:, 10] * (np.log10(param_lims[10][1]) - np.log10(param_lims[10][0])) + np.log10(param_lims[10][0]))
-    
-    # Disk phase: uniform
-    params[:, 11] = cube[:, 11] * 2*np.pi
+    params[:, 10] = cube[:, 10] * (param_lims[10][1] - param_lims[10][0]) + param_lims[10][0] # disk period
+    params[:, 11] = cube[:, 11] * 2*np.pi # disk initial phase
     
     return params
 
