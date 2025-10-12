@@ -103,7 +103,6 @@ if __name__ == '__main__':
         frac_remain=0.01,
         max_num_improvement_loops=3,
         show_status=True,
-        viz_callback=False,
         cluster_num_live_points=50,
     )
     
