@@ -146,4 +146,4 @@ From here, you can follow the (excellent and informative) [UltraNest tutorials](
 
 ## Citation
 
-If you use QPE-FIT in your research, please cite [J. Chakraborty & L.V. Drummond et al., ApJ, 992, 120 (2025)](https://ui.adsabs.harvard.edu/abs/2025ApJ...992..120C/abstract):
+If you use QPE-FIT in your research, please cite [J. Chakraborty & L.V. Drummond et al., ApJ, 992, 120 (2025)](https://ui.adsabs.harvard.edu/abs/2025ApJ...992..120C/abstract) and the [UltraNest paper](https://ui.adsabs.harvard.edu/abs/2021JOSS....6.3001B/abstract)!
