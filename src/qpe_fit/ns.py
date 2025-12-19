@@ -40,10 +40,10 @@ def make_prior_transform(param_lims):
         return cube * (lims[:, 1] - lims[:, 0]) + lims[:, 0]
     return transform
 
-def make_log_likelihood(timings, windows, errs, dt):
+def make_log_likelihood(timings, windows, errs, dt, one_crossing):
     def loglike(params):
         params = np.atleast_2d(params).astype(np.float32)
-        resid = pn.residuals(timings, windows, errs, *params.T, dt)
+        resid = pn.residuals(timings, windows, errs, *params.T, dt, one_crossing)
         ll = -0.5 * pn.to_numpy(resid)
         return np.where(np.isfinite(ll), ll, -1e30).astype(np.float64)
     return loglike
@@ -66,6 +66,7 @@ def main():
     parser.add_argument('--dkl', type=float, default=0.5, help='Target posterior uncertainty (KL divergence b/w bootstrapped integrators, in nats)')
     parser.add_argument('--frac-remain', type=float, default=0.01, help='Integrate until this fraction of the integral is left in the remainder.')
     parser.add_argument('--min-ess', type=int, default=400, help='Minimum effective sample size for nested sampling.')
+    parser.add_argument('--one-crossing', action='store_true', help='Keep only one crossing per orbit.')
     args = parser.parse_args()
 
     pn.set_backend(args.gpu)
@@ -81,7 +82,7 @@ def main():
     
     sampler = ultranest.ReactiveNestedSampler(
         param_names,
-        make_log_likelihood(timings, windows, errs, args.dt),
+        make_log_likelihood(timings, windows, errs, args.dt, args.one_crossing),
         make_prior_transform(param_lims),
         log_dir=args.output,
         resume='resume',
