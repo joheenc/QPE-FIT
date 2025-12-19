@@ -17,7 +17,7 @@ pip install qpe-fit
 # With GPU support (requires CUDA)
 pip install qpe-fit[gpu]
 ```
-The current version of QPE-FIT was only testest on CuPy/CUDA v12, which supports Python 3.8-3.12 (hence the pickiness regarding python version above). If you need a different CuPy version, ping me and I'll try to update the package accordingly.
+The current version of QPE-FIT was only tested on CuPy/CUDA v12, which supports Python 3.8-3.12 (hence the pickiness regarding python version above). If you need a different CuPy version, ping me and I'll try to update the package accordingly.
 
 ## Dependencies
 
