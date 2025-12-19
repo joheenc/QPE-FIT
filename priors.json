@@ -1,0 +1,14 @@
+{
+    "sma": {"bounds": [100, 400], "wrapped": false},
+    "e": {"bounds": [0.0, 0.5], "wrapped": false},
+    "incl": {"bounds": [0, 180], "wrapped": false},
+    "phi_r0": {"bounds": [0, 6.28], "wrapped": true},
+    "phi_theta0": {"bounds": [0, 6.28], "wrapped": true},
+    "phi_phi0": {"bounds": [0, 6.28], "wrapped": true},
+    "spin": {"bounds": [0, 0.998], "wrapped": false},
+    "logMbh": {"bounds": [5, 7], "wrapped": false},
+    "theta_obs": {"bounds": [0, 3.14], "wrapped": true},
+    "theta_d": {"bounds": [0, 20], "wrapped": false},
+    "P_d": {"bounds": [300, 800], "wrapped": false},
+    "phi_d": {"bounds": [0, 6.28], "wrapped": true}
+}
