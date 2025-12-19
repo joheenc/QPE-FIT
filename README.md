@@ -7,8 +7,8 @@ Please email joheen@mit.edu with any requests, bug reports, or comments!
 ## Installation
 
 ```bash
-conda create --name qpefit python=3.12
-conda activate qpefit
+conda create --name myenv python=3.12
+conda activate myenv
 conda install pip
 
 # CPU only
