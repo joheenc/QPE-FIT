@@ -27,16 +27,10 @@ The current version of QPE-FIT was only tested on CuPy/CUDA v12, which supports 
 - [Corner](https://corner.readthedocs.io/) : For posterior distribution plots
 - [h5py](https://www.h5py.org/) : For HDF5 file I/O
 
-## Module Overview
+## Command Overview
 
-### `trajectory.py`
-Backend script implementing the post-Newtonian (PN) formalism for EMRI trajectories. Contains:
-- GPU-accelerated computation of PN coefficients and Fourier-series trajectories following [Sago & Fujita 2015](https://arxiv.org/abs/1505.01600)
-- Disk crossing detection with relativistic time delay corrections
-- Timing residuals calculation for parameter fitting
-
-### `generate_timings.py`
-Generate mock QPE timings for a given set of EMRI/disk parameters using the PN trajectory model.
+### `qpe-gen`
+Generate mock QPE timings for a given set of EMRI/disk parameters using exact Kerr geodesics.
 
 **Usage:**
 ```bash
@@ -51,8 +45,8 @@ qpe-gen --params params.json --windows windows.txt --output-timings timings.txt 
 - `--dt`: Time step resolution (default: 10s)
 - `--one-per-orbit`: Flag to generate only one QPE per orbit (not two)
 
-### `ns.py`
-Perform nested sampling inference on QPE timings to estimate system parameters.
+### `qpe-fit`
+Perform nested sampling inference on QPE timings to estimate system parameters with post-Newtonian trajectories.
 
 **Usage:**
 ```bash
