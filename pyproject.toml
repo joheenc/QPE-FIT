@@ -1,0 +1,18 @@
+[project]
+name = "qpe-fit"
+version = "0.1.3"
+dependencies = [
+    "numpy",
+    "ultranest",
+    "corner",
+    "matplotlib",
+    "kerrgeopy",
+    "h5py"
+]
+
+[project.optional-dependencies]
+gpu = ["cupy-cuda12x"]
+
+[project.scripts]
+qpe-fit = "qpe_fit.ns:main"
+qpe-gen = "qpe_fit.generate_timings:main"
