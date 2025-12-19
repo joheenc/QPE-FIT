@@ -146,22 +146,4 @@ From here, you can follow the (excellent and informative) [UltraNest tutorials](
 
 ## Citation
 
-If you use QPE-FIT in your research, please cite [this paper](https://ui.adsabs.harvard.edu/abs/2025ApJ...992..120C/abstract):
-@ARTICLE{2025ApJ...992..120C,
-       author = {{Chakraborty}, Joheen and {Drummond}, Lisa V. and {Bonetti}, Matteo and {Franchini}, Alessia and {Kejriwal}, Shubham and {Miniutti}, Giovanni and {Arcodia}, Riccardo and {Hughes}, Scott A. and {Duque}, Francisco and {Kara}, Erin and {Sesana}, Alberto and {Giustini}, Margherita and {Motta}, Amedeo and {Burdge}, Kevin},
-        title = "{Prospects for EMRI/MBH Parameter Estimation Using Quasiperiodic Eruption Timings: Short-timescale Analysis}",
-      journal = {\apj},
-     keywords = {Supermassive black holes, Gravitational waves, Bayesian statistics, X-ray transient sources, 1663, 678, 1900, 1852, High Energy Astrophysical Phenomena, General Relativity and Quantum Cosmology},
-         year = 2025,
-        month = oct,
-       volume = {992},
-       number = {1},
-          eid = {120},
-        pages = {120},
-          doi = {10.3847/1538-4357/ae003b},
-archivePrefix = {arXiv},
-       eprint = {2508.20162},
- primaryClass = {astro-ph.HE},
-       adsurl = {https://ui.adsabs.harvard.edu/abs/2025ApJ...992..120C},
-      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
-}
+If you use QPE-FIT in your research, please cite [J. Chakraborty & L.V. Drummond et al., ApJ, 992, 120 (2025)](https://ui.adsabs.harvard.edu/abs/2025ApJ...992..120C/abstract):
