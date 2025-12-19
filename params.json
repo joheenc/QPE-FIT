@@ -1,0 +1,14 @@
+{
+    "sma": 160,
+    "e": 0.3,
+    "incl": 45,
+    "phi_r0": 1.0,
+    "phi_theta0": 0.5,
+    "phi_phi0": 2.0,
+    "spin": 0.9,
+    "logMbh": 5.1,
+    "theta_obs": 1,
+    "theta_d": 10,
+    "P_d": 500,
+    "phi_d": 0.0
+}
