@@ -1,6 +1,6 @@
 [project]
 name = "qpe-fit"
-version = "0.1.3"
+version = "0.1.9"
 dependencies = [
     "numpy",
     "ultranest",
