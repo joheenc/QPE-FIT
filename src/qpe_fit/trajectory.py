@@ -208,7 +208,7 @@ def trajectory(windows, logMbh, sma, ecc, incl, spin, phi_r0, phi_theta0, phi_ph
     P_orb = 2*xp.pi / Omega_phi * Omega_t * (4.926580927874239e-06 * 10**xp.asarray(logMbh))
     return t, r, cartesian(r, cos_theta, phi), lambd, P_orb
 
-def residuals(timings, windows, errs, sma, e, incl, phi_r0, phi_theta0, phi_phi0, a, logMbh, theta_obs, theta_d, P_d, phi_d, dt):
+def residuals(timings, windows, errs, sma, e, incl, phi_r0, phi_theta0, phi_phi0, a, logMbh, theta_obs, theta_d, P_d, phi_d, dt, one_crossing):
     t, r, (x, y, z), _, P_orb = trajectory(windows, logMbh, sma, e, incl, a, phi_r0, phi_theta0, phi_phi0, dt)
     P_d = xp.asarray(P_d) * P_orb
     theta_d = xp.radians(xp.asarray(theta_d))
@@ -221,7 +221,10 @@ def residuals(timings, windows, errs, sma, e, incl, phi_r0, phi_theta0, phi_phi0
     n_crs_y = xp.sin(theta_d[:, None]) * xp.sin(2 * xp.pi * t / P_d[:, None] + phi_d[:, None])
     n_crs_z = xp.cos(theta_d[:, None])
     D_t = n_crs_x * x + n_crs_y * y + n_crs_z * z
-    crossings_mask = (D_t[:, :-1] * D_t[:, 1:]) < 0
+    if one_crossing:
+        crossings_mask = (D_t[:, :-1] < 0) & (D_t[:, 1:] >= 0)
+    else:
+        crossings_mask = (D_t[:, :-1] * D_t[:, 1:]) < 0
     num_valid = xp.sum(crossings_mask, axis=1)
     max_num_crossings = int(xp.max(num_valid))
     t_cross = t[:, :-1] - D_t[:, :-1] * (t[:, 1:] - t[:, :-1]) / (D_t[:, 1:] - D_t[:, :-1])
@@ -245,5 +248,7 @@ def residuals(timings, windows, errs, sma, e, incl, phi_r0, phi_theta0, phi_phi0
         timings_in_window = timings[idx]
         errs_in_window = errs[idx]
         crossings_in_window = xp.pad(crossings_in_window, ((0, 0), (0, max(0, len(timings_in_window) - crossings_in_window.shape[1]))), constant_values=window[1])
+        crossings_in_window = xp.take_along_axis(crossings_in_window, xp.argsort(~xp.isfinite(crossings_in_window), axis=1)[:, :len(timings_in_window)], axis=1)
+        crossings_in_window = xp.where(crossings_in_window == xp.inf, window[1], crossings_in_window)
         resid += xp.nansum((timings_in_window - crossings_in_window[:, :len(timings_in_window)])**2 / errs_in_window**2, axis=1)
     return resid
