@@ -49,6 +49,7 @@ qpe-gen --params params.json --windows windows.txt --output-timings timings.txt 
 - `--output-timings`: Output file for QPE timings
 - `--output-windows`: Output file for observation windows
 - `--dt`: Time step resolution (default: 10s)
+- `--one-per-orbit`: Flag to generate only one QPE per orbit (not two)
 
 ### `ns.py`
 Perform nested sampling inference on QPE timings to estimate system parameters.
@@ -67,7 +68,7 @@ qpe-fit --gpu
 | `--errors` | `errors.txt` | .txt file containing QPE timing errors (one per line, in seconds) |
 | `--priors` | `priors.json` | .json file containing sampling priors |
 | `--dt` | `10.0` | Time step size for likelihood evaluations (seconds) |
-| `--gpu` | `False` | Toggle to use GPU-accelerated likelihood evaluation |
+| `--gpu` | `False` | Flag to use GPU-accelerated likelihood evaluation |
 | `--stepsampler` | `slice` | Step sampler: `none`, `slice`, `harm`, `rwalk` |
 | `--direction` | `region` | Direction function: `region`, `random`, `mixture`, `cube` |
 | `--region` | `simple` | Region class: `mlfriends`, `simple`, `ellipsoid` |
@@ -77,7 +78,7 @@ qpe-fit --gpu
 | `--dkl` | `0.5` | Target posterior uncertainty (KL divergence in nats) |
 | `--frac-remain` | `0.01` | Integrate until this fraction of the integral remains |
 | `--min-ess` | `400` | Minimum effective sample size |
-| `--one-per-orbit` | `False` | Toggle to generate only one QPE per orbit (not two) |
+| `--one-per-orbit` | `False` | Flag to generate only one QPE per orbit (not two) |
 
 **Inferred Parameters:**
 The script fits for 12 parameters:
