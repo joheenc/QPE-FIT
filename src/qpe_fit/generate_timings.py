@@ -9,6 +9,7 @@ def main():
     parser.add_argument('--params', required=True, help='JSON file with EMRI/MBH parameters')
     parser.add_argument('--windows', required=True, help='Observation windows file')
     parser.add_argument('--output-timings', required=True)
+    parser.add_argument('--one-per-orbit', action='store_true', help='Only one QPE per orbit (not two).')
     parser.add_argument('--dt', type=float, default=10.0)
     args = parser.parse_args()
     
@@ -55,7 +56,10 @@ def main():
     
     D_t = n_crs_x * xgeo + n_crs_y * ygeo + n_crs_z * zgeo
     
-    crossings_mask = (D_t[:-1] * D_t[1:]) < 0
+    if args.one_per_orbit:
+        crossings_mask = (D_t[:-1] < 0) & (D_t[1:] >= 0)
+    else:
+        crossings_mask = (D_t[:-1] * D_t[1:]) < 0
     alpha = -D_t[:-1] / (D_t[1:] - D_t[:-1])
     
     t_cross = tgeo[:-1] + alpha * (tgeo[1:] - tgeo[:-1])
