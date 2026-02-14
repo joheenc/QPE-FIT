@@ -1,13 +1,13 @@
 [project]
 name = "qpe-fit"
-version = "0.1.9"
+version = "0.1.11"
 dependencies = [
-    "numpy",
-    "ultranest",
-    "corner",
-    "matplotlib",
+    "numpy==2.3.5",
+    "ultranest==4.4.0",
+    "corner==2.2.3",
+    "matplotlib==3.10.8",
     "kerrgeopy",
-    "h5py"
+    "h5py==3.15.1"
 ]
 
 [project.optional-dependencies]
