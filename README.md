@@ -147,13 +147,19 @@ From here, you can follow the (excellent and informative) [UltraNest tutorials](
 
 ## Agnostic Pdot convention
 
-The optional `Pdot` parameter is an agnostic timing-level deformation rather than a physical orbital-evolution model. Given the unperturbed model crossing times $t_i$, QPE-FIT applies
+The optional `Pdot` parameter is an agnostic timing-level deformation rather than a physical orbital-evolution model. Given the unperturbed model crossing times $t_i$, QPE-FIT applies the accumulated-time drift
 
 $$
-t_i \rightarrow t_i + \frac{1}{2}\dot{P}\frac{(t_i - t_{\rm ref})^2}{P_{\rm ref}},
+t_i \rightarrow t_i + \frac{1}{2}\dot{P}\frac{(t_i-t_{\rm ref})^2}{P_{\rm ref}},
 $$
 
-where $t_{\rm ref}$ is the first modeled crossing time and $P_{\rm ref}$ is the median spacing between modeled crossings. The parameter $\dot{P}$ has units of s/s. Setting `Pdot = 0`, or omitting it from `params.json` and `priors.json`, recovers the original QPE-FIT timing model.
+where $t_{\rm ref}$ is the first modeled crossing time and $P_{\rm ref}$ is the median spacing between modeled crossings. In the evenly spaced limit, $t_i-t_{\rm ref}\simeq nP_{\rm ref}$, this reduces to the quadratic-ephemeris term
+
+$$
+\Delta t_n \simeq \frac{1}{2}P_{\rm ref}\dot{P}n^2,
+$$
+
+matching the period-derivative term in Eq. (1) of Chakraborty et al. (2026, arXiv:2602.16776). The parameter $\dot{P}$ has units of s/s. Setting `Pdot = 0`, or omitting it from `params.json` and `priors.json`, recovers the original QPE-FIT timing model.
 
 ## Citation
 
