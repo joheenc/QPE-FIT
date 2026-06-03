@@ -27,6 +27,11 @@ SAMPLERS = {
     'rwalk': PopulationRandomWalkSampler,
 }
 
+BASE_MODEL_PARAMS = [
+    'sma', 'e', 'incl', 'phi_r0', 'phi_theta0', 'phi_phi0',
+    'spin', 'logMbh', 'theta_obs', 'theta_d', 'P_d', 'phi_d',
+]
+
 def load_priors(path):
     with open(path) as f:
         return json.load(f)
@@ -40,10 +45,23 @@ def make_prior_transform(param_lims):
         return cube * (lims[:, 1] - lims[:, 0]) + lims[:, 0]
     return transform
 
-def make_log_likelihood(timings, windows, errs, dt, one_per_orbit):
+def make_log_likelihood(timings, windows, errs, dt, one_per_orbit, param_names):
+    missing = [name for name in BASE_MODEL_PARAMS if name not in param_names]
+    if missing:
+        raise ValueError(f"Missing required prior(s): {', '.join(missing)}")
+
     def loglike(params):
         params = np.atleast_2d(params).astype(np.float32)
-        resid = pn.residuals(timings, windows, errs, *params.T, dt, one_per_orbit)
+        if params.shape[1] != len(param_names) and params.shape[0] == len(param_names):
+            params = params.T
+
+        # Agnostic Pdot change: priors may include an optional "Pdot" entry.
+        # If it is absent, Pdot is fixed to zero and the original likelihood is
+        # recovered.  Mapping by name avoids relying on JSON key order.
+        param_by_name = {name: params[:, i] for i, name in enumerate(param_names)}
+        pdot = param_by_name.get('Pdot', np.zeros(params.shape[0], dtype=np.float32))
+        model_args = [param_by_name[name] for name in BASE_MODEL_PARAMS]
+        resid = pn.residuals(timings, windows, errs, *model_args, dt, one_per_orbit, Pdot=pdot)
         ll = -0.5 * pn.to_numpy(resid)
         return np.where(np.isfinite(ll), ll, -1e30).astype(np.float64)
     return loglike
@@ -82,7 +100,7 @@ def main():
     
     sampler = ultranest.ReactiveNestedSampler(
         param_names,
-        make_log_likelihood(timings, windows, errs, args.dt, args.one_per_orbit),
+        make_log_likelihood(timings, windows, errs, args.dt, args.one_per_orbit, param_names),
         make_prior_transform(param_lims),
         log_dir=args.output,
         resume='resume',

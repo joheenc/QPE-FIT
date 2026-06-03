@@ -164,6 +164,50 @@ def set_backend(gpu=False):
         Omegas = cupy.fuse(_Omegas)
         cartesian = cupy.fuse(_cartesian)
 
+
+def apply_agnostic_pdot(crossings, Pdot):
+    """Apply an agnostic secular period derivative to model crossing times.
+
+    Agnostic Pdot change: this is intentionally a timing-level deformation,
+    not a physical drag model.  We use the same convention as the exploratory
+    notebooks:
+
+        t -> t + 0.5 * Pdot * (t - t_ref)^2 / P_ref
+
+    where t_ref is the first modeled crossing and P_ref is the median spacing
+    between finite modeled crossings.  Pdot has units of s/s.  A missing or
+    zero Pdot therefore reduces exactly to the original QPE-FIT timing model.
+    """
+    crossings = xp.asarray(crossings)
+    Pdot = xp.asarray(Pdot)
+
+    scalar_input = crossings.ndim == 1
+    if scalar_input:
+        crossings = crossings[None, :]
+        Pdot = xp.atleast_1d(Pdot)
+
+    Pdot = xp.asarray(Pdot).reshape(-1)
+    if len(Pdot) == 1 and crossings.shape[0] != 1:
+        Pdot = xp.full(crossings.shape[0], Pdot[0])
+
+    finite = xp.isfinite(crossings)
+    diffs = xp.diff(crossings, axis=1)
+    finite_diffs = finite[:, :-1] & finite[:, 1:]
+    diffs = xp.where(finite_diffs, diffs, xp.nan)
+    reference_period = xp.nanmedian(diffs, axis=1)
+    reference_period = xp.where(
+        xp.isfinite(reference_period) & (reference_period != 0),
+        reference_period,
+        1.0,
+    )
+
+    first_index = xp.argmax(finite, axis=1)
+    t_ref = crossings[xp.arange(crossings.shape[0]), first_index]
+    drift = 0.5 * Pdot[:, None] * (crossings - t_ref[:, None])**2 / reference_period[:, None]
+    shifted = xp.where(finite, crossings + drift, crossings)
+    return shifted[0] if scalar_input else shifted
+
+
 def trajectory(windows, logMbh, sma, ecc, incl, spin, phi_r0, phi_theta0, phi_phi0, dt):
     e = xp.asarray(ecc)
     p = xp.asarray(sma) * (1-e**2)
@@ -208,7 +252,7 @@ def trajectory(windows, logMbh, sma, ecc, incl, spin, phi_r0, phi_theta0, phi_ph
     P_orb = 2*xp.pi / Omega_phi * Omega_t * (4.926580927874239e-06 * 10**xp.asarray(logMbh))
     return t, r, cartesian(r, cos_theta, phi), lambd, P_orb
 
-def residuals(timings, windows, errs, sma, e, incl, phi_r0, phi_theta0, phi_phi0, a, logMbh, theta_obs, theta_d, P_d, phi_d, dt, one_per_orbit):
+def residuals(timings, windows, errs, sma, e, incl, phi_r0, phi_theta0, phi_phi0, a, logMbh, theta_obs, theta_d, P_d, phi_d, dt, one_per_orbit, Pdot=0.0):
     t, r, (x, y, z), _, P_orb = trajectory(windows, logMbh, sma, e, incl, a, phi_r0, phi_theta0, phi_phi0, dt)
     P_d = xp.asarray(P_d) * P_orb
     theta_d = xp.radians(xp.asarray(theta_d))
@@ -241,6 +285,10 @@ def residuals(timings, windows, errs, sma, e, incl, phi_r0, phi_theta0, phi_phi0
     crossings = xp.where(crossings_mask, t_cross + shapiro_delay + geometric_delay, xp.nan)
     sorted_indices = xp.argsort(xp.isnan(crossings), axis=1)
     all_crossings = xp.sort(xp.take_along_axis(crossings, sorted_indices, axis=1)[:, :max_num_crossings], axis=1)
+    # Agnostic Pdot change: optionally deform the predicted crossing-time
+    # sequence before matching to the observed timings.  Pdot defaults to zero,
+    # so existing runs without a Pdot prior are unchanged.
+    all_crossings = apply_agnostic_pdot(all_crossings, Pdot)
     resid = xp.zeros_like(sma)
     for window in windows:
         crossings_in_window = xp.where((all_crossings >= window[0]) & (all_crossings <= window[1]) & xp.isfinite(all_crossings), all_crossings, xp.inf)

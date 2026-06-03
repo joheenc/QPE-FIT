@@ -19,6 +19,14 @@ def main():
     for key in p:
         p[key] = np.atleast_1d(p[key])
     n_sets = len(p['logMbh'])
+
+    # Agnostic Pdot change: params.json may optionally include "Pdot" in s/s.
+    # If it is absent, the default is zero and qpe-gen reproduces the original
+    # timing generation.  A scalar Pdot is broadcast across vectorized runs.
+    if 'Pdot' not in p:
+        p['Pdot'] = np.zeros(n_sets)
+    elif len(p['Pdot']) == 1 and n_sets > 1:
+        p['Pdot'] = np.full(n_sets, p['Pdot'][0])
     
     windows = np.loadtxt(args.windows, ndmin=2)    
     t_g = 4.926580927874239e-06 * 10**p['logMbh']
@@ -80,7 +88,10 @@ def main():
         geometric_delay = r_cross * cos_angle * t_g[i]
         
         crossings = np.where(crossings_mask, t_cross + shapiro_delay + geometric_delay, np.nan)
-        all_crossings.append(crossings[~np.isnan(crossings)])
+        crossings = crossings[~np.isnan(crossings)]
+        # Agnostic Pdot change: apply the same timing-level secular drift used
+        # in the likelihood.  Pdot=0 leaves the crossing sequence unchanged.
+        all_crossings.append(pn.apply_agnostic_pdot(crossings, p['Pdot'][i]))
     
     if n_sets == 1:
         np.savetxt(args.output_timings, all_crossings[0])
